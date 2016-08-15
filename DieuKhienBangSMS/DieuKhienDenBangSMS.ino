@@ -1,4 +1,18 @@
 
+/*Cấu trúc câu lệnh SMS hoặc Serial
+  *101# Kiểm tra tài khoản
+  *100*xxxxxxxxxxxxxxx# Nạp tiền vào tài khoản
+  *TL TMK Tìm mật khẩu
+  *TL DMK Đặt lại mật khẩu
+  *TL NHO 1/0 Nhớ/không nhớ trạng thái của rơ-le
+  *TL TTRLMD TCRL MO/TAT|RL1 MO/TAT RL2 MO/TAT RL3 MO/TAT RL4 MO/TAT Đặt trạng thái mặc định khi thiết bị khởi động
+  *TL RESET Khởi động lại thiết bị
+  *TL DKGS xxxxxxxx Đặt thời gian không giám sát xxxxxxxx là giờ, phút bắt đầu và giờ phút kết thúc
+  *TL TKGS Lấy thông tin thời gian không giám sát
+  *DKRL MK TCRL MO/TAT|RL1 MO/TAT RL2 MO/TAT RL3 MO/TAT RL4 MO/TAT Điều khiển rơ-le
+  *DKRL MK TT Lấy tình trạng hiện tại rơ-le
+ */
+ 
 #include "SIM900.h"
 #include <SoftwareSerial.h>
 #include "sms.h"
@@ -171,9 +185,16 @@ void loop()
     
   //Xử lý cuộc gọi đến
   XuLyCuocGoiDen();
-  
-}
 
+  //Xu lý nhiệt độ cao
+  XuLyNhietDo();
+}
+void XuLyNhietDo(void)
+{
+  if (DS3231_get_treg()>50){
+    sms.SendSMS(numberMaster,"Canh Bao: Nhiet do da hon 50*C");
+  }
+}
 void InKetQua(byte vitri, boolean chuyendong)
 {
   char buff[40];
@@ -418,8 +439,8 @@ void XuLySMSKTTaiKhoan(void)
   cmd[0]=0;
   LayLenhUSSD(message,cmd,7);
   ChayLenhUSSD(cmd,resp,160);
-   Serial.println(resp);
-  //sms.SendSMS(number,resp);
+  Serial.println(resp);
+  sms.SendSMS(number,resp);
 }
 
 void XuLySMSNapTien(void)
@@ -431,7 +452,7 @@ void XuLySMSNapTien(void)
   LayLenhUSSD(message,cmd,21);
   ChayLenhUSSD(cmd,resp,160);
   Serial.println(resp);
-  //sms.SendSMS(number,resp);
+  sms.SendSMS(number,resp);
 }
 
 void DatTinhTrangMacDinh(void)
@@ -790,15 +811,4 @@ void parse_cmd(char *cmd, int cmdsize)
     }
 }
 
-/*Cấu trúc câu lệnh SMS hoặc Serial
-  *101# Kiểm tra tài khoản
-  *100*xxxxxxxxxxxxxxx# Nạp tiền vào tài khoản
-  *TL TMK Tìm mật khẩu
-  *TL DMK Đặt lại mật khẩu
-  *TL NHO 1/0 Nhớ/không nhớ trạng thái của rơ-le
-  *TL TTRLMD TCRL MO/TAT|RL1 MO/TAT RL2 MO/TAT RL3 MO/TAT RL4 MO/TAT Đặt trạng thái mặc định khi thiết bị khởi động
-  *TL RESET Khởi động lại thiết bị
-  *DKRL MK TCRL MO/TAT|RL1 MO/TAT RL2 MO/TAT RL3 MO/TAT RL4 MO/TAT Điều khiển rơ-le
-  *DKRL MK TT Lấy tình trạng hiện tại rơ-le
- */
 
